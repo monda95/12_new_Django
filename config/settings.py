@@ -37,9 +37,11 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = []
+THIRD_PARTY_APPS = [
+    'django_extensions',
+]
 
-OWN_APPS = ['todo',]
+OWN_APPS = ['todo', 'member']
 
 # Application definition
 
@@ -55,7 +57,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "totolist.urls"
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
@@ -74,7 +76,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "totolist.wsgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Database
@@ -110,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ko-KR"
 
 TIME_ZONE = "UTC"
 
@@ -128,3 +130,8 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+#login
+LOGIN_REDIRECT_URL = "/todo/"
+LOGIN_URL = "/todo/"
+LOGOUT_REDIRECT_URL = "/todo/"
