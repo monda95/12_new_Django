@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>로그인이 필요합니다.</h1>
+    <p>To-Do 리스트를 확인하려면 로그인하거나 회원가입 해주세요.</p>
+    <p>
+        <a href="{% url 'login' %}">로그인</a> 또는 <a href="{% url 'signup' %}">회원가입</a>
+    </p>
+{% endblock %}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #eaeaea;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        li:hover {
+            background: #d4d4d4;
+        }
+        a {
+            text-decoration: none;
+            color: #333;
+        }
+        /* 모든 버튼 및 버튼처럼 보이는 링크에 대한 공통 스타일 */
+        button,
+        a.button-style {
+            background-color: #808000; /* 올리브 그린 */
+            color: white;
+            padding: 8px 12px; /* 회원가입 버튼 기준으로 크기 조정 */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 5px; /* 버튼 간 간격 */
+            transition: background-color 0.3s ease;
+        }
+        button:hover,
+        a.button-style:hover {
+            background-color: #6b8e23; /* 약간 더 진한 올리브 그린 */
+        }
+        /* li 태그 안의 a 태그는 버튼 스타일 적용 제외 */
+        li a {
+            background-color: transparent; /* 배경색 제거 */
+            color: #333; /* 글자색 유지 */
+            padding: 0; /* 패딩 제거 */
+            border: none; /* 테두리 제거 */
+            border-radius: 0; /* 둥근 모서리 제거 */
+            font-size: inherit; /* 글자 크기 상속 */
+            text-align: left; /* 텍스트 정렬 */
+            text-decoration: none; /* 밑줄 제거 */
+            display: inline; /* 인라인 요소로 유지 */
+            margin: 0; /* 마진 제거 */
+        }
+        li a:hover {
+            background-color: transparent; /* 호버 시 배경색 제거 */
+        }
+        /* 기존 폼 스타일 유지 */
+        form p {
+            margin-bottom: 15px;
+        }
+        form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        form input[type="text"],
+        form input[type="date"],
+        form textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box; /* padding과 border가 width에 포함되도록 */
+        }
+        form input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        /* Todo 추가 페이지 폼 필드 너비 조정 */
+        form.todo-create-form input[type="text"],
+        form.todo-create-form input[type="date"],
+        form.todo-create-form textarea {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="text-align: right">
+            {%  if request.user.is_authenticated %}
+                <span>안녕하세요, {{ request.user.username }}님</span>
+                <form action="{% url 'logout' %}" method="post" style="display: inline">
+                {% csrf_token %}
+                <button>로그아웃</button>
+                </form>
+
+            {% else %}
+                <a href="{% url 'signup' %}">회원가입</a>
+                <a href="{% url 'login' %}"> 로그인 </a>
+            {%  endif %}
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

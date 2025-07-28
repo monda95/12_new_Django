@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %} 할 일 상세 {% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>{{ todo.title }}</h1>
+        <table>
+            <tr>
+                <th>작성자</th>
+                <td>{{ todo.author.username }}</td> <!-- 작성자 -->
+            </tr>
+            <tr>
+                <th>내용</th>
+                <td>{{ todo.description }}</td>
+            </tr>
+            <tr>
+                <th>시작일</th>
+                <td>{{ todo.start_date }}</td>
+            </tr>
+            <tr>
+                <th>종료일</th>
+                <td>{{ todo.end_date }}</td>
+            </tr>
+            <tr>
+                <th>완료 여부</th>
+                <td>{% if todo.is_completed %}완료{% else %}미완료{% endif %}</td>
+            </tr>
+            <tr>
+                <th>생성일</th>
+                <td>{{ todo.created_at }}</td>
+            </tr>
+            <tr>
+                <th>수정일</th>
+                <td>{{ todo.updated_at }}</td>
+            </tr>
+        </table>
+
+            {% if is_author %}
+                <p>
+                    <a href="{% url 'todo_update' todo.pk %}">수정</a>
+                    <form action="{% url 'todo_delete' todo.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">삭제</button>
+                    </form>
+                </p>
+            {% endif %}
+            <p><a href="{% url 'todo_list' %}">목록으로 돌아가기</a></p>
+        </div>
+{% endblock %}

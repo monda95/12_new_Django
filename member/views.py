@@ -5,6 +5,12 @@ from django.contrib.auth import login as django_login
 from django.urls import reverse
 
 
+def index(request):
+    if request.user.is_authenticated:
+        return redirect('todo_list')
+    return render(request, 'home.html')
+
+
 def sign_up(request):
 #     username = request.POST.get('username')
 #     password1 = request.POST.get('password1')
@@ -19,7 +25,7 @@ def sign_up(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect(settings.LOGIN_URL)
+            return redirect('login')
     #     if form.is_valid():
     #         form.save()
     #         return redirect('/accounts/login/')
@@ -36,7 +42,7 @@ def login(request):
     form = AuthenticationForm(request, request.POST or None)
     if form.is_valid():
         django_login(request, form.get_user())
-        return redirect(reverse("todo:todo_list"))
+        return redirect(reverse("todo_list"))
     context = {
         'form':form
     }
