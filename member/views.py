@@ -7,7 +7,7 @@ from django.urls import reverse
 
 def index(request):
     if request.user.is_authenticated:
-        return redirect('todo_list')
+        return redirect('todo:list')
     return render(request, 'home.html')
 
 
@@ -42,7 +42,7 @@ def login(request):
     form = AuthenticationForm(request, request.POST or None)
     if form.is_valid():
         django_login(request, form.get_user())
-        return redirect(reverse("todo_list"))
+        return redirect(reverse("todo:list"))
     context = {
         'form':form
     }

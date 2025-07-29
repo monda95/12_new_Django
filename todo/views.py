@@ -55,7 +55,7 @@ def todo_create(request):
             todo.author = request.user
             todo.save()
 
-            return redirect(reverse('todo_detail', kwargs={'pk': todo.pk}))  # 'blog_detail' -> 'todo_detail'
+            return redirect(reverse('todo:detail', kwargs={'pk': todo.pk}))  # 'blog_detail' -> 'todo_detail'
     else:
         form = TodoForm()
     context = {'form': form}
@@ -69,7 +69,7 @@ def todo_update(request, pk):  # 'blog_update' -> 'todo_update'
     form = TodoForm(request.POST or None, instance=todo)
     if form.is_valid():
         todo = form.save()
-        return redirect(reverse('todo_detail', kwargs={'pk': todo.pk}))  # 'blog_detail' -> 'todo_detail'
+        return redirect(reverse('todo:detail', kwargs={'pk': todo.pk}))  # 'blog_detail' -> 'todo_detail'
 
     context = {
         'todo': todo,
@@ -84,4 +84,4 @@ def todo_delete(request, pk):
     todo = get_object_or_404(Todo, pk=pk, author=request.user)
     todo.delete()
 
-    return redirect(reverse('todo_list'))
+    return redirect(reverse('todo:list'))

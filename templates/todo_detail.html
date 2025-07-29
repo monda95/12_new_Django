@@ -12,7 +12,7 @@
             </tr>
             <tr>
                 <th>내용</th>
-                <td>{{ todo.description }}</td>
+                <td>{{ todo.content }}</td> {# todo.description -> todo.content 로 수정 #}
             </tr>
             <tr>
                 <th>시작일</th>
@@ -36,15 +36,15 @@
             </tr>
         </table>
 
-            {% if is_author %}
-                <p>
-                    <a href="{% url 'todo_update' todo.pk %}">수정</a>
-                    <form action="{% url 'todo_delete' todo.pk %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit">삭제</button>
-                    </form>
-                </p>
+        <div style="text-align: right; margin-top: 20px;">
+            <a href="{% url 'todo:list' %}" class="button-style">목록으로</a>
+            {% if can_edit %}
+                <a href="{% url 'todo:update' todo.pk %}" class="button-style">수정</a>
+                <form action="{% url 'todo:delete' todo.pk %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">삭제</button>
+                </form>
             {% endif %}
-            <p><a href="{% url 'todo_list' %}">목록으로 돌아가기</a></p>
         </div>
+    </div>
 {% endblock %}
