@@ -1,62 +1,39 @@
 {% extends 'base.html' %}
+
+{% block title %}할 일 목록{% endblock %}
+
 {% block content %}
-<h1> Todo 목록</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Todo 목록</h1>
+    <a href="{% url 'todo:create' %}" class="btn btn-primary">+ 새 할 일 생성</a>
+</div>
 
-
-  <p style="text-align: right">
-    <a href="{% url 'todo:create' %}">생성</a>
-  </p>
- <ul>
- {%  for todo in page_obj %}
- <li>
-     <a href="{% url 'todo:detail' todo.pk %}">
-        ({{ todo.id }}) {{ todo.title }} <small>{{ todo.created | date:"Y-m-d" }}</small>
-     </a>
-     {# <p>{{ todo.content }}</p> #}
- </li>
-{%  endfor %}
- </ul>
-
-
-{#검색폼#}
-<form method="get" style="margin-bottom: 10px">
-    <input name="q" type="text" placeholder="검색어를 입력하세요" value="{% if request.GET.q %}{{ request.GET.q }}{% endif %}">
-    <button>검색</button>
+<!-- 검색 폼 -->
+<form method="get" class="mb-4">
+    <div class="input-group">
+        <input name="q" type="text" class="form-control" placeholder="검색어를 입력하세요" value="{{ request.GET.q|default:'' }}">
+        <button class="btn btn-outline-secondary" type="submit">검색</button>
+    </div>
 </form>
 
-
-
-{#페이지네이션#}
-<div style="text-align: center">
-{% if page_obj.has_previous %}
-    <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">&laquo 처음</a>
-    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">이전</a>
-{% endif %}
-
-{% if page_obj.number|add:-2 > 1 %}
-  <a href="?page={{ page_obj.number|add:-3 }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">&hellip;</a>
-{% endif %}
-
-
-{% for i in page_obj.paginator.page_range %}
-    {% if page_obj.number == i %}
-    <span>(현재페이지)</span>
-    {% elif i > page_obj.number|add:-3 and i < page_obj.number|add:3 %}
-      <a href="?page={{ i }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ i }}</a>
-
-    {% endif %}
-
-{% endfor %}
-
-
-{% if page_obj.paginator.num_pages > page_obj.number|add:2 %}
-  <a href="?page={{ page_obj.number|add:3 }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">&hellip;</a>
-{%  endif %}
-
-{% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">다음</a>
-    <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">마지막 &raquo;</a>
-{#        raquo는 >>꺽쇠같은 표시해줌#}
-{% endif %}
+<div class="list-group">
+    {% for todo in todos %}
+        <a href="{% url 'todo:detail' todo_pk=todo.pk %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ todo.title }}</h5>
+                <small>{{ todo.start_date }} ~ {{ todo.end_date }}</small>
+            </div>
+            <p class="mb-1">{{ todo.content|truncatewords:20 }}</p>
+            <small>{% if todo.is_completed %}완료{% else %}미완료{% endif %} - 작성자: {{ todo.author.username }}</small>
+        </a>
+    {% empty %}
+        <div class="list-group-item">
+            <p class="mb-1">아직 할 일이 없습니다. 새 할 일을 추가해보세요!</p>
+        </div>
+    {% endfor %}
 </div>
+
+<!-- 페이지네이션 -->
+{% include 'pagination.html' %}
+
 {% endblock %}

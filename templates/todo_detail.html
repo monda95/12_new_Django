@@ -1,50 +1,150 @@
 {% extends 'base.html' %}
 
-{% block title %} 할 일 상세 {% endblock %}
+{% block title %}{{ todo.title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .placeholder-center::placeholder {
+        text-align: center;
+        line-height: 3.5; /* 4줄일 때 대략적인 중앙 정렬 */
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1>{{ todo.title }}</h1>
-        <table>
-            <tr>
-                <th>작성자</th>
-                <td>{{ todo.author.username }}</td> <!-- 작성자 -->
-            </tr>
-            <tr>
-                <th>내용</th>
-                <td>{{ todo.content }}</td> {# todo.description -> todo.content 로 수정 #}
-            </tr>
-            <tr>
-                <th>시작일</th>
-                <td>{{ todo.start_date }}</td>
-            </tr>
-            <tr>
-                <th>종료일</th>
-                <td>{{ todo.end_date }}</td>
-            </tr>
-            <tr>
-                <th>완료 여부</th>
-                <td>{% if todo.is_completed %}완료{% else %}미완료{% endif %}</td>
-            </tr>
-            <tr>
-                <th>생성일</th>
-                <td>{{ todo.created_at }}</td>
-            </tr>
-            <tr>
-                <th>수정일</th>
-                <td>{{ todo.updated_at }}</td>
-            </tr>
-        </table>
-
-        <div style="text-align: right; margin-top: 20px;">
-            <a href="{% url 'todo:list' %}" class="button-style">목록으로</a>
-            {% if can_edit %}
-                <a href="{% url 'todo:update' todo.pk %}" class="button-style">수정</a>
-                <form action="{% url 'todo:delete' todo.pk %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit">삭제</button>
-                </form>
-            {% endif %}
-        </div>
+<div class="card mb-4">
+    <div class="card-header">
+        <h2 class="card-title">{{ todo.title }}</h2>
     </div>
+    <div class="card-body">
+        <p><strong>작성자:</strong> {{ todo.author.username }}</p>
+        <p><strong>내용:</strong></p>
+        <p>{{ todo.content|linebreaksbr }}</p>
+        <p><strong>기간:</strong> {{ todo.start_date }} ~ {{ todo.end_date }}</p>
+        <p><strong>상태:</strong> {% if todo.is_completed %}완료{% else %}미완료{% endif %}</p>
+        <p class="text-muted">생성일: {{ todo.created_at|date:"Y-m-d H:i" }} | 수정일: {{ todo.updated_at|date:"Y-m-d H:i" }}</p>
+    </div>
+    <div class="card-footer text-right">
+        <a href="{% url 'todo:list' %}" class="btn btn-secondary">목록으로</a>
+        {% if can_edit %}
+            <a href="{% url 'todo:update' todo_pk=todo.pk %}" class="btn btn-info">수정</a>
+            <form action="{% url 'todo:delete' todo_pk=todo.pk %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">삭제</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+<hr>
+
+<!-- 댓글 목록 -->
+<div class="mt-4">
+    <h4><i class="bi bi-chat-dots-fill"></i> 댓글 ({{ comments.paginator.count }})</h4>
+    <hr>
+    <div id="comment-list">
+        {% for comment in comments %}
+            {% include 'partials/_comment.html' with comment=comment user=request.user %}
+        {% empty %}
+            <p id="no-comment-message">아직 댓글이 없습니다.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 댓글 작성 폼 -->
+<div class="mt-4">
+    <form id="comment-form" action="{% url 'todo:comment_create' todo_pk=todo.pk %}" method="post">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group mb-2">
+                    {{ comment_form.content }}
+                </div>
+                <div class="d-flex justify-content-end align-items-center">
+                    <input type="password" class="form-control" placeholder="비밀번호" style="max-width: 150px;">
+                    <button type="submit" class="btn btn-primary ms-2">작성</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- 페이지네이션 -->
+<div style="margin-top: 10rem;">
+    {% include 'pagination.html' %}
+</div>
+
+<!-- 하단 여백 -->
+<div style="height: 20rem;"></div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const commentForm = document.getElementById('comment-form');
+        const commentList = document.getElementById('comment-list');
+        const noCommentMessage = document.getElementById('no-comment-message');
+
+        // 댓글 작성 처리
+        commentForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(commentForm);
+            const url = commentForm.getAttribute('action');
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 기존 "댓글 없음" 메시지 삭제
+                    if (noCommentMessage) {
+                        noCommentMessage.remove();
+                    }
+                    // 새 댓글 추가
+                    commentList.insertAdjacentHTML('afterbegin', data.html);
+                    commentForm.reset(); // 폼 초기화
+                } else {
+                    console.error('Error:', data.errors);
+                    alert('댓글 작성에 실패했습니다.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // 댓글 삭제 처리 (이벤트 위임 사용)
+        commentList.addEventListener('submit', function(e) {
+            if (e.target && e.target.classList.contains('delete-comment-form')) {
+                e.preventDefault();
+
+                const deleteForm = e.target;
+                const url = deleteForm.getAttribute('action');
+                const commentId = deleteForm.closest('.card').id;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': deleteForm.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById(commentId).remove();
+                    } else {
+                        alert('댓글 삭제에 실패했습니다.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+</script>
 {% endblock %}

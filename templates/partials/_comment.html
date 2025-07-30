@@ -1,0 +1,17 @@
+<div class="card mb-2" id="comment-{{ comment.pk }}">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <div>
+                <strong>{{ comment.author.username }}</strong>
+                <small class="text-muted">- 방금 전</small>
+            </div>
+            {% if user == comment.author or user.is_superuser %}
+                <form action="{% url 'todo:comment_delete' comment_pk=comment.pk %}" method="post" class="delete-comment-form" onsubmit="return confirm('정말로 이 댓글을 삭제하시겠습니까?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">삭제</button>
+                </form>
+            {% endif %}
+        </div>
+        <p class="mt-2">{{ comment.content|linebreaksbr }}</p>
+    </div>
+</div>

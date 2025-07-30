@@ -1,9 +1,25 @@
-{%  extends 'base.html' %}
+{% extends 'base.html' %}
+
+{% block title %}새 할 일 생성{% endblock %}
+
 {% block content %}
-<h1>Todo 추가</h1>
-<form method="post" class="todo-create-form">
-    {%  csrf_token %}
-    {{  form.as_p }}
-    <button>생성</button>
-</form>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">새 할 일 생성</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                        <a href="{% url 'todo:list' %}" class="btn btn-secondary me-md-2">취소</a>
+                        <button type="submit" class="btn btn-primary">생성</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
