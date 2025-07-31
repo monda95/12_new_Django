@@ -3,13 +3,14 @@
 {% block title %}TodoApp에 오신 것을 환영합니다{% endblock %}
 
 {% block content %}
-<div class="p-5 mb-4 bg-light rounded-3">
+<div class="p-5 mb-4 bg-light rounded-3 text-center">
     <div class="container-fluid py-5">
         <h1 class="display-5 fw-bold">Todo List</h1>
-        <p class="col-md-8 fs-4">오늘 할 일을 관리하고, 생산성을 높여보세요.</p>
-        <p>To-Do 리스트를 확인하려면 로그인하거나 회원가입 해주세요.</p>
-        <a href="{% url 'login' %}" class="btn btn-primary btn-lg">로그인</a>
-        <a href="{% url 'signup' %}" class="btn btn-secondary btn-lg">회원가입</a>
+        <p class="fs-4 mx-auto" style="max-width: 600px;">오늘 할 일을 관리하고, 생산성을 높여보세요.</p>
+        <p class="mb-4">To-Do 리스트를 확인하려면 로그인하거나 회원가입 해주세요.</p>
+        <div class="d-flex justify-content-center">
+
+        </div>
     </div>
 </div>
 {% endblock %}

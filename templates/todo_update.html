@@ -3,23 +3,162 @@
 {% block title %}할 일 수정{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">할 일 수정</h2>
+<div class="card">
+    <div class="card-header">
+        <h2 class="text-center">할 일 수정</h2>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>폼 오류:</strong>
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% if field != '__all__' %}
+                                <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+                            {% else %}
+                                <li>{{ errors|join:", " }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            <div class="mb-3">
+                <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                {{ form.title }}
             </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                        <a href="{% url 'todo:detail' todo_pk=todo.pk %}" class="btn btn-secondary me-md-2">취소</a>
-                        <button type="submit" class="btn btn-primary">수정</button>
+            <div class="mb-3">
+                <label class="form-label">{{ form.image.label }}</label>
+                <div class="card p-3">
+                    <div class="row align-items-center">
+                        <!-- Left Column: File Input -->
+                        <div class="col-md-7">
+                            <p class="mb-2 small text-muted"><strong>이미지 변경</strong></p>
+                            <input type="file" name="{{ form.image.html_name }}" class="form-control" id="{{ form.image.id_for_label }}">
+                        </div>
+
+                        <!-- Right Column: Current Image Preview & Delete Button -->
+                        <div class="col-md-5">
+                            <div id="image-display-area">
+                                {% if form.instance.image %}
+                                    <div id="current-image-wrapper">
+                                        <p class="mb-2 small text-muted text-center"><strong>현재 이미지</strong></p>
+                                        <a href="{{ form.instance.image.url }}" target="_blank">
+                                            <img src="{{ form.instance.image.url }}" alt="{{ form.instance.title }}" class="img-fluid rounded" id="preview-image">
+                                        </a>
+                                        <!-- Hidden checkbox for form submission -->
+                                        <input type="checkbox" name="{{ form.image.html_name }}-clear" id="{{ form.image.id_for_label }}_clear_id" style="display: none;">
+                                        <!-- Visible toggle button for UX -->
+                                        <button id="delete-image-btn" class="btn btn-danger btn-sm w-100 mt-2">이미지 삭제</button>
+                                    </div>
+                                    <div id="no-image-placeholder" class="text-center text-muted p-3 border rounded" style="display: none;">
+                                        <p class="mb-0">이미지가 삭제됩니다.</p>
+                                        <button id="undo-delete-btn" class="btn btn-secondary btn-sm w-100 mt-2">삭제 취소</button>
+                                    </div>
+                                {% else %}
+                                    <div id="current-image-wrapper" style="display: none;">
+                                        <p class="mb-2 small text-muted text-center"><strong>현재 이미지</strong></p>
+                                        <a href="#" target="_blank">
+                                            <img src="" alt="" class="img-fluid rounded" id="preview-image">
+                                        </a>
+                                        <input type="checkbox" name="{{ form.image.html_name }}-clear" id="{{ form.image.id_for_label }}_clear_id" style="display: none;">
+                                        <button id="delete-image-btn" class="btn btn-danger btn-sm w-100 mt-2">이미지 삭제</button>
+                                    </div>
+                                    <div id="no-image-placeholder" class="text-center text-muted p-3 border rounded">
+                                        <p class="mb-0">현재 이미지가 없습니다.</p>
+                                        <button id="undo-delete-btn" class="btn btn-secondary btn-sm w-100 mt-2" style="display: none;">삭제 취소</button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
+            <div class="mb-3">
+                <label for="{{ form.content.id_for_label }}" class="form-label">{{ form.content.label }}</label>
+                {{ form.content }}
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.start_date.id_for_label }}" class="form-label">{{ form.start_date.label }}</label>
+                    {{ form.start_date }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.end_date.id_for_label }}" class="form-label">{{ form.end_date.label }}</label>
+                    {{ form.end_date }}
+                </div>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                <a href="{% url 'todo:detail' todo_pk=todo.pk %}" class="btn btn-secondary me-md-2">취소</a>
+                <button type="submit" class="btn btn-primary">수정</button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
+
+{% block js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hiddenCheckbox = document.getElementById('{{ form.image.id_for_label }}_clear_id');
+    const deleteBtn = document.getElementById('delete-image-btn');
+    const undoBtn = document.getElementById('undo-delete-btn');
+    const fileInput = document.getElementById('{{ form.image.id_for_label }}');
+    const imagePreviewWrapper = document.getElementById('current-image-wrapper');
+    const noImagePlaceholder = document.getElementById('no-image-placeholder');
+    const previewImage = document.getElementById('preview-image');
+
+    // Function to update image preview
+    function updateImagePreview(file) {
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                imagePreviewWrapper.style.display = 'block';
+                noImagePlaceholder.style.display = 'none';
+                hiddenCheckbox.checked = false; // Uncheck delete if new file is selected
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // No file selected, revert to original state or 'no image' state
+            if (imagePreviewWrapper) imagePreviewWrapper.style.display = 'none';
+            if (noImagePlaceholder) noImagePlaceholder.style.display = 'block';
+            previewImage.src = '';
+        }
+    }
+
+    // Event listener for file input change
+    fileInput.addEventListener('change', function() {
+        updateImagePreview(this.files[0]);
+    });
+
+    // Event listeners for delete/undo buttons
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            hiddenCheckbox.checked = true;
+            imagePreviewWrapper.style.display = 'none';
+            noImagePlaceholder.style.display = 'block';
+            fileInput.value = ''; // Clear any newly selected file
+        });
+    }
+
+    if (undoBtn) {
+        undoBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            hiddenCheckbox.checked = false;
+            // If there was an original image, show it. Otherwise, show 'no image' placeholder.
+            {% if form.instance.image %}
+                imagePreviewWrapper.style.display = 'block';
+                noImagePlaceholder.style.display = 'none';
+            {% else %}
+                imagePreviewWrapper.style.display = 'none';
+                noImagePlaceholder.style.display = 'block';
+            {% endif %}
+        });
+    }
+});
+</script>
+{% endblock %}
+

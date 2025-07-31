@@ -19,12 +19,27 @@
 <div class="list-group">
     {% for todo in todos %}
         <a href="{% url 'todo:detail' todo_pk=todo.pk %}" class="list-group-item list-group-item-action">
-            <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">{{ todo.title }}</h5>
-                <small>{{ todo.start_date }} ~ {{ todo.end_date }}</small>
+            <div class="d-flex w-100">
+                <div class="flex-shrink-0 me-3" style="width: 100px; height: 100px;">
+                    {% if todo.thumbnail %}
+                        <img src="{{ todo.thumbnail.url }}" alt="{{ todo.title }}" class="rounded w-100 h-100" style="object-fit: cover;">
+                    {% elif todo.image %}
+                        <img src="{{ todo.image.url }}" alt="{{ todo.title }}" class="rounded w-100 h-100" style="object-fit: cover;">
+                    {% else %}
+                        <div class="rounded bg-secondary w-100 h-100 d-flex align-items-center justify-content-center">
+                            <span class="text-white-50 small">No Image</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ todo.title }}</h5>
+                        <small>{{ todo.start_date }} ~ {{ todo.end_date }}</small>
+                    </div>
+                    <p class="mb-1">{{ todo.content|striptags|truncatewords:20 }}</p>
+                    <small>{% if todo.is_completed %}완료{% else %}미완료{% endif %} - 작성자: {{ todo.author.username }}</small>
+                </div>
             </div>
-            <p class="mb-1">{{ todo.content|truncatewords:20 }}</p>
-            <small>{% if todo.is_completed %}완료{% else %}미완료{% endif %} - 작성자: {{ todo.author.username }}</small>
         </a>
     {% empty %}
         <div class="list-group-item">

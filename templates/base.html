@@ -30,16 +30,16 @@
                         <a class="nav-link" href="{% url 'todo:list' %}">할 일 목록</a>
                     </li>
                 </ul>
-                <div class="d-flex">
+                <div class="d-flex align-items-center">
                     {% if user.is_authenticated %}
                         <span class="navbar-text me-3">안녕하세요, {{ user.username }}님</span>
-                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        <form action="{% url 'logout' %}" method="post" class="d-inline">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-secondary btn-sm">로그아웃</button>
+                            <button type="submit" class="btn btn-secondary btn-sm">로그아웃</button>
                         </form>
                     {% else %}
-                        <a href="{% url 'signup' %}" class="btn btn-primary btn-sm me-2">회원가입</a>
-                        <a href="{% url 'login' %}" class="btn btn-success btn-sm">로그인</a>
+                        <a href="{% url 'login' %}" class="btn btn-success btn-sm me-2">로그인</a>
+                        <a href="{% url 'signup' %}" class="btn btn-primary btn-sm ">회원가입</a>
                     {% endif %}
                 </div>
             </div>

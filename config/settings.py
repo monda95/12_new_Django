@@ -39,6 +39,9 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'django_extensions',
+    'django_summernote',
+    'django_cleanup.apps.CleanupConfig',
+    'widget_tweaks'
 ]
 
 OWN_APPS = ['todo', 'member']
@@ -140,3 +143,106 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/todo/"
 LOGIN_URL = "/login/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+SUMMERNOTE_CONFIG = {
+    # Using SummernoteWidget - iframe mode, default
+
+    # Or, you can set it to `False` to use SummernoteInplaceWidget by default - no iframe mode
+    # In this case, you have to load Bootstrap/jQuery sources and dependencies manually.
+    # Use this when you're already using Bootstrap/jQuery based themes.
+    'iframe': True,
+
+    # You can put custom Summernote settings
+    'summernote': {
+        # As an example, using Summernote Air-mode
+        'airMode': False,
+
+        # Change editor size
+        'width': '100%',
+        'height': '800',
+
+
+
+        # Toolbar customization
+        # https://summernote.org/deep-dive/#custom-toolbar-popover
+        'toolbar': [
+            ['style', ['style']],
+            ['font', ['bold', 'underline', 'clear']],
+            ['fontname', ['fontname']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'video']],
+            ['view', ['fullscreen', 'help']],
+        ],
+
+        # Or, explicitly set language/locale for editor
+        'lang': 'ko-KR',
+
+
+        # You can also add custom settings for external plugins
+        # 'print': {
+        #     'stylesheetUrl': '/some_static_folder/printable.css',
+        # },
+        'codemirror': {
+            'mode': 'htmlmixed',
+            'lineNumbers': 'true',
+            # You have to include theme file in 'css' or 'css_for_inplace' before using it.
+            'theme': 'monokai',
+        },
+    },
+
+    # Require users to be authenticated for uploading attachments.
+    'attachment_require_authentication': True,
+
+
+
+    # Set custom storage class for attachments.
+
+
+    # Set custom model for attachments (default: 'django_summernote.Attachment')
+
+
+    # You can completely disable the attachment feature.
+    'disable_attachment': False,
+
+    # Set to `False` to return attachment paths in relative URIs.
+    'attachment_absolute_uri': True,
+
+    # test_func in summernote upload view. (Allow upload images only when user passes the test)
+    # https://docs.djangoproject.com/en/2.2/topics/auth/default/#django.contrib.auth.mixins.UserPassesTestMixin
+
+    # You can add custom css/js for SummernoteWidget.
+    # 'css': (
+    # ),
+    # 'js': (
+    # ),
+    #
+    # # You can also add custom css/js for SummernoteInplaceWidget.
+    # # !!! Be sure to put {{ form.media }} in template before initiate summernote.
+    # 'css_for_inplace': (
+    # ),
+    # 'js_for_inplace': (
+    # ),
+    #
+    # # Codemirror as codeview
+    # # If any codemirror settings are defined, it will include codemirror files automatically.
+    # 'css': (
+    #     '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.29.0/theme/monokai.min.css',
+    # ),
+    #
+    # # Lazy initialization
+    # # If you want to initialize summernote at the bottom of page, set this as True
+    # # and call `initSummernote()` on your page.
+    # 'lazy': True,
+    #
+    # # To use external plugins,
+    # # Include them within `css` and `js`.
+    # 'js': {
+    #     '/some_static_folder/summernote-ext-print.js',
+    #     '//somewhere_in_internet/summernote-plugin-name.js',
+    # },
+}

@@ -11,7 +11,7 @@ from todo.models import Todo, Comment
 from .forms import TodoForm, CommentForm
 
 
-class TodoListView(ListView):
+class TodoListView(LoginRequiredMixin, ListView):
     model = Todo
     queryset = Todo.objects.all().order_by('created_at')
     template_name = 'todo_list.html'

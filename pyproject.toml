@@ -13,6 +13,10 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.13"
 django = ">=5.2.4,<6.0.0"
+django-summernote = "^0.8.20.0"
+pillow = "^11.3.0"
+django-cleanup = "^9.0.0"
+django-widget-tweaks = "^1.5.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -11,6 +11,7 @@ from todo.forms import TodoForm
 from django.core.paginator import Paginator
 
 
+@login_required()
 def todo_list(request):
     todos = Todo.objects.all().order_by('created_at')
 

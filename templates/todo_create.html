@@ -3,23 +3,40 @@
 {% block title %}새 할 일 생성{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">새 할 일 생성</h2>
+<div class="card">
+    <div class="card-header">
+        <h2 class="text-center">새 할 일 생성</h2>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                {{ form.title }}
             </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                        <a href="{% url 'todo:list' %}" class="btn btn-secondary me-md-2">취소</a>
-                        <button type="submit" class="btn btn-primary">생성</button>
-                    </div>
-                </form>
+            <div class="mb-3">
+                <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }}</label>
+                {{ form.image }}
             </div>
-        </div>
+            <div class="mb-3">
+                <label for="{{ form.content.id_for_label }}" class="form-label">{{ form.content.label }}</label>
+                {{ form.content }}
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.start_date.id_for_label }}" class="form-label">{{ form.start_date.label }}</label>
+                    {{ form.start_date }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.end_date.id_for_label }}" class="form-label">{{ form.end_date.label }}</label>
+                    {{ form.end_date }}
+                </div>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                <a href="{% url 'todo:list' %}" class="btn btn-secondary me-md-2">취소</a>
+                <button type="submit" class="btn btn-primary">생성</button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

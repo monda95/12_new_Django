@@ -19,16 +19,21 @@
     <div class="card-body">
         <p><strong>작성자:</strong> {{ todo.author.username }}</p>
         <p><strong>내용:</strong></p>
-        <p>{{ todo.content|linebreaksbr }}</p>
+        {% if todo.image %}
+            <div class="mb-3 text-center">
+                <img src="{{ todo.image.url }}" alt="{{ todo.title }}" class="img-fluid rounded">
+            </div>
+        {% endif %}
+        <p>{{ todo.content|safe }}</p>
         <p><strong>기간:</strong> {{ todo.start_date }} ~ {{ todo.end_date }}</p>
         <p><strong>상태:</strong> {% if todo.is_completed %}완료{% else %}미완료{% endif %}</p>
         <p class="text-muted">생성일: {{ todo.created_at|date:"Y-m-d H:i" }} | 수정일: {{ todo.updated_at|date:"Y-m-d H:i" }}</p>
     </div>
-    <div class="card-footer text-right">
+    <div class="card-footer d-flex justify-content-end">
         <a href="{% url 'todo:list' %}" class="btn btn-secondary">목록으로</a>
         {% if can_edit %}
             <a href="{% url 'todo:update' todo_pk=todo.pk %}" class="btn btn-info">수정</a>
-            <form action="{% url 'todo:delete' todo_pk=todo.pk %}" method="post" style="display:inline;">
+            <form action="{% url 'todo:delete' todo_pk=todo.pk %}" method="post" class="d-inline" onsubmit="return confirm('정말로 삭제하시겠습니까?');">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">삭제</button>
             </form>
@@ -70,12 +75,12 @@
 </div>
 
 <!-- 페이지네이션 -->
-<div style="margin-top: 10rem;">
+<div class="mt-5">
     {% include 'pagination.html' %}
 </div>
 
 <!-- 하단 여백 -->
-<div style="height: 20rem;"></div>
+<div class="mb-5"></div>
 
 {% endblock %}
 
