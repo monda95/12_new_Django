@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block title %}새 할 일 생성{% endblock %}
 
@@ -10,26 +11,52 @@
     <div class="card-body">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
             <div class="mb-3">
                 <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
-                {{ form.title }}
+                {{ form.title|attr:"class:form-control" }}
+                {% for error in form.title.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
             </div>
             <div class="mb-3">
                 <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }}</label>
-                {{ form.image }}
+                {{ form.image|attr:"class:form-control" }}
+                {% for error in form.image.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+                <div id="image-preview-area" class="mt-2" style="display: none;">
+                    <img id="preview-image" src="#" alt="Image Preview" class="img-fluid rounded" style="max-height: 200px; object-fit: cover;">
+                    <button type="button" id="clear-image-btn" class="btn btn-danger btn-sm mt-2">이미지 삭제</button>
+                </div>
             </div>
             <div class="mb-3">
                 <label for="{{ form.content.id_for_label }}" class="form-label">{{ form.content.label }}</label>
-                {{ form.content }}
+                {{ form.content|attr:"class:form-control" }}
+                {% for error in form.content.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="{{ form.start_date.id_for_label }}" class="form-label">{{ form.start_date.label }}</label>
-                    {{ form.start_date }}
+                    {{ form.start_date|attr:"class:form-control" }}
+                    {% for error in form.start_date.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="{{ form.end_date.id_for_label }}" class="form-label">{{ form.end_date.label }}</label>
-                    {{ form.end_date }}
+                    {{ form.end_date|attr:"class:form-control" }}
+                    {% for error in form.end_date.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
@@ -39,4 +66,40 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+        const imagePreviewArea = document.getElementById('image-preview-area');
+        const previewImage = document.getElementById('preview-image');
+        const clearImageBtn = document.getElementById('clear-image-btn');
+
+        function previewFile() {
+            const file = imageInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    imagePreviewArea.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewImage.src = '#';
+                imagePreviewArea.style.display = 'none';
+            }
+        }
+
+        imageInput.addEventListener('change', previewFile);
+
+        clearImageBtn.addEventListener('click', function() {
+            imageInput.value = ''; // 파일 입력 필드 초기화
+            previewFile(); // 미리보기 영역 숨기기
+        });
+
+        // 페이지 로드 시 이미 선택된 파일이 있다면 미리보기
+        previewFile();
+    });
+</script>
 {% endblock %}

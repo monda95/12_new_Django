@@ -1,33 +1,8 @@
-# Byte-code files
-*.pyc
-__pycache__/
 
 # Virtual environment
-.venv/
+C:\Users\jungm\PycharmProjects\Pycharmstudy\Todolist\.venv
 venv/
 
 # Database
 db.sqlite3
 
-# Media and static files (if collected)
-/media/
-/static/
-
-# IDE-specific files
-.idea/
-*.iml
-.vscode/
-
-# Operating System files
-.DS_Store
-Thumbs.db
-
-# Poetry lock file (optional, but often committed)
-# poetry.lock
-
-# Other common ignores
-*.log
-*.pot
-*.mo
-.env
-.env.*

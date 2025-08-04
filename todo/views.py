@@ -10,6 +10,9 @@ from django.views.decorators.http import require_http_methods
 from todo.forms import TodoForm
 from django.core.paginator import Paginator
 
+import datetime
+import calendar
+
 
 @login_required()
 def todo_list(request):
@@ -20,6 +23,58 @@ def todo_list(request):
         todos = todos.filter(Q(title__icontains=q) |
                              Q(content__icontains=q)
         )
+    
+    # 캘린더 관련 로직 추가
+    today = datetime.date.today()
+    current_year = int(request.GET.get('year', today.year))
+    current_month = int(request.GET.get('month', today.month))
+
+    cal = calendar.Calendar()
+    month_days = cal.monthdayscalendar(current_year, current_month)
+
+    calendar_weeks = []
+    for week in month_days:
+        week_data = []
+        for day in week:
+            day_date = None
+            is_current_month = True
+            is_today = False
+            day_todos = []
+
+            if day != 0:
+                day_date = datetime.date(current_year, current_month, day)
+                if day_date == today:
+                    is_today = True
+                
+                # 해당 날짜의 Todo 가져오기
+                day_todos = Todo.objects.filter(
+                    author=request.user,
+                    start_date__lte=day_date,
+                    end_date__gte=day_date
+                ).order_by('start_date')
+
+            else: # 다른 달의 날짜
+                is_current_month = False
+                # 다른 달의 날짜는 표시하지 않거나, 필요에 따라 처리
+
+            week_data.append({
+                'date': day_date,
+                'is_current_month': is_current_month,
+                'is_today': is_today,
+                'is_saturday': day_date and day_date.weekday() == 5, # 토요일 (5)
+                'is_sunday': day_date and day_date.weekday() == 6,   # 일요일 (6)
+                'todos': day_todos,
+            })
+        calendar_weeks.append(week_data)
+
+    # 이전 달, 다음 달 URL 생성
+    prev_month_date = datetime.date(current_year, current_month, 1) - datetime.timedelta(days=1)
+    next_month_date = datetime.date(current_year, current_month, 1) + datetime.timedelta(days=32) # 다음 달로 넘어가기 위해 넉넉하게 32일 더함
+
+    prev_month_url = reverse('todo:list') + f'?year={prev_month_date.year}&month={prev_month_date.month}'
+    next_month_url = reverse('todo:list') + f'?year={next_month_date.year}&month={next_month_date.month}'
+
+
     paginator = Paginator(todos, 10)
     page = request.GET.get('page')
     page_object = paginator.get_page(page)
@@ -34,6 +89,11 @@ def todo_list(request):
         'todos': todos,
         'page_object': page_object,
         'show_pages': show_pages,
+        'current_year': current_year,
+        'current_month': current_month,
+        'calendar_weeks': calendar_weeks,
+        'prev_month_url': prev_month_url,
+        'next_month_url': next_month_url,
     }
     return render(request, 'todo_list.html', context)
 

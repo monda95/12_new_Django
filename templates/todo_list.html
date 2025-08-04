@@ -1,54 +1,212 @@
 {% extends 'base.html' %}
 
-{% block title %}할 일 목록{% endblock %}
+{% block title %}할 일 달력{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Todo 목록</h1>
-    <a href="{% url 'todo:create' %}" class="btn btn-primary">+ 새 할 일 생성</a>
-</div>
+<div class="container">
+    <!-- 캘린더 -->
+    <div class="calendar-container">
+        <div class="calendar-month-header">
+            <button class="calendar-nav-btn float-start" onclick="location.href='{{ prev_month_url }}'">‹</button>
+            {{ current_year }}년 {{ current_month }}월
+            <button class="calendar-nav-btn float-end" onclick="location.href='{{ next_month_url }}'">›</button>
+        </div>
 
-<!-- 검색 폼 -->
-<form method="get" class="mb-4">
-    <div class="input-group">
-        <input name="q" type="text" class="form-control" placeholder="검색어를 입력하세요" value="{{ request.GET.q|default:'' }}">
-        <button class="btn btn-outline-secondary" type="submit">검색</button>
-    </div>
-</form>
+        <!-- 요일 헤더 -->
+        <div class="row g-0">
+            {% for weekday in "월화수목금토일" %}
+            <div class="col weekday-header {% if weekday == "토" %}saturday{% elif weekday == "일" %}sunday{% endif %}">{{ weekday }}</div>
+            {% endfor %}
+        </div>
 
-<div class="list-group">
-    {% for todo in todos %}
-        <a href="{% url 'todo:detail' todo_pk=todo.pk %}" class="list-group-item list-group-item-action">
-            <div class="d-flex w-100">
-                <div class="flex-shrink-0 me-3" style="width: 100px; height: 100px;">
-                    {% if todo.thumbnail %}
-                        <img src="{{ todo.thumbnail.url }}" alt="{{ todo.title }}" class="rounded w-100 h-100" style="object-fit: cover;">
-                    {% elif todo.image %}
-                        <img src="{{ todo.image.url }}" alt="{{ todo.title }}" class="rounded w-100 h-100" style="object-fit: cover;">
-                    {% else %}
-                        <div class="rounded bg-secondary w-100 h-100 d-flex align-items-center justify-content-center">
-                            <span class="text-white-50 small">No Image</span>
-                        </div>
-                    {% endif %}
-                </div>
-                <div class="flex-grow-1">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ todo.title }}</h5>
-                        <small>{{ todo.start_date }} ~ {{ todo.end_date }}</small>
+        <!-- 캘린더 날짜들 -->
+        {% for week in calendar_weeks %}
+        <div class="row g-0">
+            {% for day_data in week %}
+            <div class="col date-cell {% if day_data.is_sunday %}sunday{% endif %} {% if day_data.is_saturday %}saturday{% endif %} {% if day_data.is_today %}today{% endif %} {% if not day_data.is_current_month %}other-month{% endif %}"
+                 data-date="{{ day_data.date|date:'Y-m-d' }}"
+                 onclick="selectDate('{{ day_data.date|date:'Y-m-d' }}')">
+
+                <div class="date-number">{{ day_data.date|date:"j" }}</div>
+
+                <!-- 할일 표시 - 스크롤 가능한 컨테이너 -->
+                <div class="day-todos">
+                    {% for todo in day_data.todos %}
+                    <div class="task-item {% if todo.is_completed %}completed{% endif %}"
+                         title="{{ todo.title }}"
+                         draggable="true"
+                         data-todo-id="{{ todo.pk }}"
+                         data-todo-date="{{ day_data.date|date:'Y-m-d' }}"
+                         onclick="event.stopPropagation(); location.href='{% url 'todo:detail' todo_pk=todo.pk %}'">
+                        {{ todo.title|truncatechars:12 }}
                     </div>
-                    <p class="mb-1">{{ todo.content|striptags|truncatewords:20 }}</p>
-                    <small>{% if todo.is_completed %}완료{% else %}미완료{% endif %} - 작성자: {{ todo.author.username }}</small>
+                    {% empty %}
+                        <span class="no-todo-message"></span>
+                    {% endfor %}
                 </div>
             </div>
-        </a>
-    {% empty %}
-        <div class="list-group-item">
-            <p class="mb-1">아직 할 일이 없습니다. 새 할 일을 추가해보세요!</p>
+            {% endfor %}
         </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- 검색 폼 -->
+    <div class="calendar-info-card mb-4">
+        <form method="get">
+            <div class="input-group">
+                <input name="q" type="text" class="form-control" placeholder="검색어를 입력하세요" value="{{ request.GET.q|default:'' }}">
+                <button class="btn btn-outline-secondary" type="submit">검색</button>
+            </div>
+        </form>
+    </div>
+
+    {% if searched_todos %}
+    <div class="calendar-info-card mt-4">
+        <h5>검색 결과: <button class="btn btn-sm btn-outline-secondary ms-2" onclick="location.href='{% url 'todo:list' %}'"><i class="bi bi-arrow-clockwise"></i> 새로고침</button></h5>
+        <ul class="list-group">
+            {% for todo in searched_todos %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ todo.start_date|date:"n월 j일" }} : <a href="{% url 'todo:detail' todo_pk=todo.pk %}">{{ todo.title }}</a></span>
+                {% if todo.is_completed %}
+                    <span class="badge bg-success rounded-pill">완료</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark rounded-pill">진행중</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% elif request.GET.q %} {# 검색 결과가 없지만 검색어가 있는 경우 #}
+    <div class="calendar-info-card alert alert-info text-center mt-4" role="alert">
+        "{{ request.GET.q }}"에 대한 검색 결과가 없습니다.
+    </div>
+    {% endif %}
+
+    {% if not calendar_weeks and not request.GET.q %}
+        <div class="calendar-info-card alert alert-info text-center mt-4" role="alert">
+            아직 할 일이 없습니다. 새 할 일을 추가해보세요!
+        </div>
+    {% endif %}
 </div>
+{% endblock %}
 
-<!-- 페이지네이션 -->
-{% include 'pagination.html' %}
+{% block js %}
+<script>
+    // 드래그 앤 드롭 관련 변수
+    let draggedTodo = null;
+    let draggedFromDate = null;
 
+    // 날짜 선택 함수
+    function selectDate(date) {
+        // 선택한 날짜로 할일 생성 페이지로 이동하거나 모달 열기
+        window.location.href = "{% url 'todo:create' %}?date=" + date;
+    }
+
+    // CSRF 토큰 가져오기
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 할일 날짜 업데이트 함수
+    function updateTodoDate(todoId, newDate, originalDate) {
+        fetch(`/todo/update-date/${todoId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+                'new_date': newDate
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 성공시 페이지 새로고침
+                location.reload();
+            } else {
+                alert('할일 이동에 실패했습니다: ' + (data.error || '알 수 없는 오류'));
+                // 실패시 원래 위치로 복원
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('할일 이동 중 오류가 발생했습니다.');
+            location.reload();
+        });
+    }
+
+    // 드래그 앤 드롭 이벤트 설정
+    document.addEventListener('DOMContentLoaded', function() {
+        const todoItems = document.querySelectorAll('.task-item');
+        const dateCells = document.querySelectorAll('.date-cell');
+
+        // 할일 아이템에 드래그 이벤트 추가
+        todoItems.forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                draggedTodo = this.dataset.todoId;
+                draggedFromDate = this.dataset.todoDate;
+                this.classList.add('dragging');
+
+                // 드래그 데이터 설정
+                e.dataTransfer.setData('text/plain', draggedTodo);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            item.addEventListener('dragend', function(e) {
+                this.classList.remove('dragging');
+                draggedTodo = null;
+                draggedFromDate = null;
+            });
+        });
+
+        // 날짜 셀에 드롭 이벤트 추가
+        dateCells.forEach(cell => {
+            cell.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                this.classList.add('drag-over');
+            });
+
+            cell.addEventListener('dragleave', function(e) {
+                // 자식 요소로 이동하는 경우는 제외
+                if (!this.contains(e.relatedTarget)) {
+                    this.classList.remove('drag-over');
+                }
+            });
+
+            cell.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                this.classList.remove('drag-over');
+
+                const newDate = this.dataset.date;
+
+                // 같은 날짜로 드롭하는 경우 무시
+                if (draggedTodo && newDate !== draggedFromDate) {
+                    updateTodoDate(draggedTodo, newDate, draggedFromDate);
+                }
+            });
+        });
+
+        // 오늘 날짜로 스크롤
+        const todayCell = document.querySelector('.date-cell.today');
+        if (todayCell) {
+            todayCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+</script>
 {% endblock %}

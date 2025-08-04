@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}회원가입 완료{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">회원가입 완료</h2>
+            </div>
+            <div class="card-body text-center">
+                <p>회원가입이 성공적으로 완료되었습니다. 이메일 인증을 위해 발송된 메일을 확인해주세요.</p>
+                <p>메일이 오지 않았다면 스팸함을 확인하거나, 잠시 후 다시 시도해주세요.</p>
+                <a href="{% url 'login' %}" class="btn btn-primary">로그인 페이지로 이동</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

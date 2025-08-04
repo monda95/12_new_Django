@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -7,49 +8,40 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .container {
-            max-width: 800px; /* 너비 확장 */
-        }
-        .card-footer {
-            background-color: #fff;
-        }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <!-- 헤더 -->
+    <div class="calendar-header-section">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">TodoApp</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'todo:list' %}">할 일 목록</a>
-                    </li>
-                </ul>
-                <div class="d-flex align-items-center">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0"><a href="{% url 'member:index' %}" class="text-white text-decoration-none">📅 TodoApp</a></h1>
+                </div>
+                <div class="col-md-6 text-md-end">
                     {% if user.is_authenticated %}
-                        <span class="navbar-text me-3">안녕하세요, {{ user.username }}님</span>
-                        <form action="{% url 'logout' %}" method="post" class="d-inline">
+                        <span class="me-3 text-white">안녕하세요, {{ user.nickname }}님 <a href="{% url 'member:profile_update' %}" class="text-white text-decoration-none">[설정]</a></span>
+                        <a href="{% url 'todo:create' %}" class="btn btn-create me-2">새 할일 생성</a>
+                        <form action="{% url 'member:logout' %}" method="post" class="d-inline">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-secondary btn-sm">로그아웃</button>
+                            <button type="submit" class="btn btn-logout">로그아웃</button>
                         </form>
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-success btn-sm me-2">로그인</a>
-                        <a href="{% url 'signup' %}" class="btn btn-primary btn-sm ">회원가입</a>
+                        <a href="{% url 'member:login' %}" class="btn btn-login me-2">로그인</a>
+                        <a href="{% url 'member:signup' %}" class="btn btn-register">회원가입</a>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <main class="container">
+    <div class="container">
         {% block content %}
         {% endblock %}
-    </main>
+    </div>
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

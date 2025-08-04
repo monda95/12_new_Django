@@ -6,13 +6,11 @@ from todo import views as todo_views
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', member_views.index, name='index'),
+    path('', include('member.urls')),
     path('admin/', admin.site.urls),
     path('todo/', include('todo.urls')),
 
     path('accounts/', include('django.contrib.auth.urls')),
-    path('signup/', member_views.sign_up, name='signup'),
-    path('login/', member_views.login, name='login'),
     #summetnote
     path('summernote/', include('django_summernote.urls')),
 ]

@@ -117,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "ko-KR"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Seoul"
 
 USE_I18N = True
 
@@ -246,3 +246,22 @@ SUMMERNOTE_CONFIG = {
     #     '//somewhere_in_internet/summernote-plugin-name.js',
     # },
 }
+
+# Custom User Model
+AUTH_USER_MODEL = 'member.User'
+
+# Load secret keys
+import json
+
+secret_file = BASE_DIR / '.config_secret' / 'secret.json'
+
+with open(secret_file) as f:
+    SECRET = json.loads(f.read())
+
+# Email settings (for Naver Mail)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.naver.com"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = SECRET['email']['user']
+EMAIL_HOST_PASSWORD = SECRET['email']['password']
